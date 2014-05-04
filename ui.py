@@ -7,20 +7,17 @@
 import rumps
 import control
 import config
+import json
 
 class Harmenubar(rumps.App):
     def __init__(self):
         super(Harmenubar,self).__init__('Harmenubar',icon='resources/icon.png')
-        print 'Logging in to Logitech'
-        self.session_token = control.login_to_logitech('adreg@megalan.org', 'ankeborg', '192.168.0.158')
-        print 'Connecting client'
-        client = control.get_client('192.168.0.158', self.session_token)
-        print 'Getting current activity'
-        self.activity = client.get_current_activity() # 5337127
         self.activity = 5337127
-        client.disconnect(send_close=True)
+        self.auth()
 
-        self.cfg = config.HarmonyConfig('harmony.json')
+        cfg = self.get_and_store_config()
+
+        self.cfg = config.HarmonyConfig(cfg)
         self.activities = self.cfg.get_activities()
         self.devices = self.cfg.get_devices()
         activity_menu = self.build_activity_menu()
@@ -34,6 +31,24 @@ class Harmenubar(rumps.App):
             {'Device': device_menu},
         ]
         self.update_current_activity(self.activity)
+
+    def auth(self):
+        print 'Logging in to Logitech'
+        self.session_token = control.login_to_logitech('adreg@megalan.org', 'ankeborg', '192.168.0.158')
+        print 'Connecting client'
+        client = control.get_client('192.168.0.158', self.session_token)
+        print 'Getting current activity'
+        self.activity = client.get_current_activity() # 5337127
+        client.disconnect(send_close=True)
+
+    def get_and_store_config(self):
+        client = control.get_client('192.168.0.158', self.session_token)
+        print 'Getting configuration'
+        cfg = client.get_config()
+        client.disconnect(send_close=True)
+        with self.open('config.json','w') as f:
+            f.write(json.dumps(cfg))
+        return cfg
 
     def build_activity_menu(self):
         menu = []

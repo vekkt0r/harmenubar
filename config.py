@@ -1,9 +1,6 @@
-import json
-
 class HarmonyConfig(object):
-    def __init__(self, config_file):
-        with open(config_file) as f:
-            self.json = json.loads(f.read())
+    def __init__(self, config):
+        self.json = config
 
     def get_activities(self):
         return self._build_kv_menu('activity')

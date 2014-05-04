@@ -1,9 +1,11 @@
 import unittest
 import config
+import json
 
 class TestConfig(unittest.TestCase):
     def setUp(self):
-        self.cfg = config.HarmonyConfig('harmony.json')
+        with open('harmony.json') as f:
+            self.cfg = config.HarmonyConfig(json.loads(f.read()))
 
     def test_get_activities(self):
         a = self.cfg.get_activities()
