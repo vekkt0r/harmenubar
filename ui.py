@@ -1,8 +1,7 @@
 #
 # Todos:
-# - load stored json file at startup, fetch from server if missing
-# - build menu from json
 # - Keychain integration
+# - move out activities to main menu?
 #
 import rumps
 import control
@@ -15,35 +14,37 @@ class Harmenubar(rumps.App):
         self.activity = 5337127
         self.auth()
 
-        cfg = self.get_and_store_config()
+        try:
+            with self.open('config.json','r') as f:
+                cfg = json.loads(f.read())
+        except IOError:
+            cfg = self.get_and_store_config()
 
         self.cfg = config.HarmonyConfig(cfg)
         self.activities = self.cfg.get_activities()
         self.devices = self.cfg.get_devices()
-        activity_menu = self.build_activity_menu()
-        device_menu = self.build_device_menu()
 
         self.menu = [
             rumps.MenuItem('Current Activity:'),
             None,
             rumps.MenuItem('Power Off', callback=lambda m: self.set_activity(m,-1)),
-            {'Activity': activity_menu},
-            {'Device': device_menu},
+            {'Activity': self.build_activity_menu()},
+            {'Device': self.build_device_menu()},
         ]
         self.update_current_activity(self.activity)
 
     def auth(self):
-        print 'Logging in to Logitech'
+        print 'Logging in to Logitech..'
         self.session_token = control.login_to_logitech('adreg@megalan.org', 'ankeborg', '192.168.0.158')
-        print 'Connecting client'
+        print 'Connecting client..'
         client = control.get_client('192.168.0.158', self.session_token)
-        print 'Getting current activity'
-        self.activity = client.get_current_activity() # 5337127
+        print 'Get current activity..'
+        self.activity = client.get_current_activity()
         client.disconnect(send_close=True)
 
     def get_and_store_config(self):
         client = control.get_client('192.168.0.158', self.session_token)
-        print 'Getting configuration'
+        print 'Get configuration..'
         cfg = client.get_config()
         client.disconnect(send_close=True)
         with self.open('config.json','w') as f:
