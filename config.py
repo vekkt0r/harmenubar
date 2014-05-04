@@ -6,10 +6,13 @@ class HarmonyConfig(object):
             self.json = json.loads(f.read())
 
     def get_activities(self):
-        activities = {}
-        for a in self.json['activity']:
-            activities.update({int(a['id']): a['label']})
-        return activities
+        return self._build_kv_menu('activity')
 
     def get_devices(self):
-        pass
+        return self._build_kv_menu('device')
+
+    def _build_kv_menu(self, key):
+        menu = {}
+        for d in self.json[key]:
+            menu.update({int(d['id']): d['label']})
+        return menu
