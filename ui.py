@@ -25,6 +25,8 @@ class Harmenubar(rumps.App):
         cfg = self.load_config_file(self.REMOTE_CONFIG)
         if cfg is None:
             cfg = self.get_and_store_config()
+        else:
+            print 'Using cached harmony configuration from disk'
 
         self.cfg = config.HarmonyConfig(cfg)
         self.activities = self.cfg.get_activities()
@@ -37,6 +39,7 @@ class Harmenubar(rumps.App):
             {'Activity': self.build_activity_menu()},
             {'Device': self.build_device_menu()},
             None,
+            rumps.MenuItem('Refresh config', callback=lambda m: self.get_and_store_config()),
             rumps.MenuItem('Preferences', callback=lambda m: self.settings_popup())
         ]
         self.update_current_activity(self.activity)
@@ -52,8 +55,8 @@ class Harmenubar(rumps.App):
         settings = {'username':'',
                     'password':'',
                     'harmony_ip':'',}
-        w = rumps.Window('')
-        w.title = 'Harmenubar settings'
+        w = rumps.Window('Change settings in the textbox below', 'Harmenubar settings')
+        w.icon = 'resources/icon.png'
         if self.settings is None:
             w.default_text = json.dumps(settings, indent=4)
         else:
@@ -88,7 +91,13 @@ class Harmenubar(rumps.App):
         client.disconnect(send_close=True)
 
     def get_client(self):
-        return control.get_client(self.settings['harmony_ip'], self.session_token)
+        c = control.get_client(self.settings['harmony_ip'], self.session_token)
+        if c is None:
+            print 'Could not get client, trying to get new session token'
+            self.settings.pop('auth_token') 
+            self.auth()
+            c = control.get_client(self.settings['harmony_ip'], self.session_token)
+        return c
 
     def get_and_store_config(self):
         client = self.get_client()
@@ -97,6 +106,7 @@ class Harmenubar(rumps.App):
         client.disconnect(send_close=True)
         with self.open(self.REMOTE_CONFIG,'w') as f:
             f.write(json.dumps(cfg))
+        print 'Configuration saved.'
         return cfg
 
     def build_activity_menu(self):
