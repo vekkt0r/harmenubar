@@ -2,7 +2,6 @@
 # Todos:
 # - Keychain integration
 # - move out activities to main menu?
-# - cyclic check of current activity
 #
 import rumps
 import control
@@ -21,6 +20,7 @@ class Harmenubar(rumps.App):
             self.settings = self.settings_popup()
 
         self.auth()
+        self.get_current_activity()
 
         cfg = self.load_config_file(self.REMOTE_CONFIG)
         if cfg is None:
@@ -43,6 +43,13 @@ class Harmenubar(rumps.App):
             rumps.MenuItem('Preferences', callback=lambda m: self.settings_popup())
         ]
         self.update_current_activity(self.activity)
+
+    def get_current_activity(self):
+        print 'Connecting client..'
+        client = self.get_client()
+        print 'Get current activity..'
+        self.activity = client.get_current_activity()
+        client.disconnect(send_close=True)
 
     def load_config_file(self, fname):
         try:
@@ -84,11 +91,6 @@ class Harmenubar(rumps.App):
             self.settings['auth_token'] = self.session_token
             self.save_settings()
         print self.session_token
-        print 'Connecting client..'
-        client = self.get_client()
-        print 'Get current activity..'
-        self.activity = client.get_current_activity()
-        client.disconnect(send_close=True)
 
     def get_client(self):
         c = control.get_client(self.settings['harmony_ip'], self.session_token)
@@ -135,6 +137,11 @@ class Harmenubar(rumps.App):
     def update_current_activity(self, activity):
         self.menu['Current Activity:'].title = 'Current Activity: ' + self.activities[activity]
         self.activity = activity
+
+    @rumps.timer(3600)
+    def check_activity(self,sender):
+        print 'Checking activity...'
+        self.get_current_activity()
 
 if __name__ == '__main__':
     Harmenubar().run()
