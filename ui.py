@@ -1,6 +1,5 @@
 #
 # Todos:
-# - Keychain integration
 # - move out activities to main menu?
 #
 import rumps
@@ -20,7 +19,7 @@ class Harmenubar(rumps.App):
             self.settings = self.settings_popup()
 
         self.auth()
-        self.get_current_activity()
+        self.activity = self.get_current_activity()
 
         cfg = self.load_config_file(self.REMOTE_CONFIG)
         if cfg is None:
@@ -45,11 +44,10 @@ class Harmenubar(rumps.App):
         self.update_current_activity(self.activity)
 
     def get_current_activity(self):
-        print 'Connecting client..'
         client = self.get_client()
-        print 'Get current activity..'
-        self.activity = client.get_current_activity()
+        activity = client.get_current_activity()
         client.disconnect(send_close=True)
+        return activity
 
     def load_config_file(self, fname):
         try:
@@ -122,7 +120,9 @@ class Harmenubar(rumps.App):
     def build_device_menu(self):
         menu = []
         for key,value in self.devices.iteritems():
-            if key != -1:
+            if type(value) == list:
+               pass 
+            elif key != -1:
                 menu.append(rumps.MenuItem(value))
         return menu
 
@@ -141,7 +141,9 @@ class Harmenubar(rumps.App):
     @rumps.timer(3600)
     def check_activity(self,sender):
         print 'Checking activity...'
-        self.get_current_activity()
+        current = self.get_current_activity()
+        if current != self.activity:
+            self.update_current_activity(current)
 
 if __name__ == '__main__':
     Harmenubar().run()
