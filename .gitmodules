@@ -1,0 +1,3 @@
+[submodule "pyharmony"]
+	path = pyharmony
+	url = https://github.com/petele/pyharmony.git
