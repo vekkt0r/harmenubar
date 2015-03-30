@@ -1,5 +1,5 @@
 import sys
-from harmony import auth 
+from harmony import auth
 from harmony import client as harmony_client
 
 def login_to_logitech(email, password, harmony_ip, harmony_port=5222):
@@ -29,8 +29,7 @@ def get_client(ip, session_token, port=5222):
 #def set_activity(session_token):
 #    client = harmony_client.create_and_connect_client(
 #        harmony_ip, harmony_port, session_token)
-    
+
 
 #def create_client():
 #    client.disconnect(send_close=True)
-    

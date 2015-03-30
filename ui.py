@@ -1,7 +1,7 @@
 #
 # Todos:
 # - move out activities to main menu?
-#
+# - Use logging submodule instead of prints
 import rumps
 import control
 import config
@@ -83,8 +83,8 @@ class Harmenubar(rumps.App):
         else:
             print 'Logging in to Logitech..'
             self.session_token = control.login_to_logitech(
-                self.settings['username'], 
-                self.settings['password'], 
+                self.settings['username'],
+                self.settings['password'],
                 self.settings['harmony_ip'])
             self.settings['auth_token'] = self.session_token
             self.save_settings()
@@ -94,7 +94,7 @@ class Harmenubar(rumps.App):
         c = control.get_client(self.settings['harmony_ip'], self.session_token)
         if c is None:
             print 'Could not get client, trying to get new session token'
-            self.settings.pop('auth_token') 
+            self.settings.pop('auth_token')
             self.auth()
             c = control.get_client(self.settings['harmony_ip'], self.session_token)
         return c
@@ -113,7 +113,7 @@ class Harmenubar(rumps.App):
         menu = []
         for key,value in self.activities.iteritems():
             if key != -1:
-                menu.append(rumps.MenuItem(value, 
+                menu.append(rumps.MenuItem(value,
                                            callback=lambda m,i=key: self.set_activity(m,i)))
         return menu
 
@@ -121,7 +121,7 @@ class Harmenubar(rumps.App):
         menu = []
         for key,value in self.devices.iteritems():
             if type(value) == list:
-               pass 
+               pass
             elif key != -1:
                 menu.append(rumps.MenuItem(value))
         return menu
