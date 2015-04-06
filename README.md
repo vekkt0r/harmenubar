@@ -42,7 +42,7 @@ the python scrips.
 
 You can either run the python script directly from this directory:
 
-    python ui.py
+    PYTHONPATH=./pyharmony python ui.py
 
 Or create a standalone OS X application with py2app:
 

@@ -26,7 +26,7 @@ class Harmenubar(rumps.App):
 
         self.settings = self.load_config_file(self.APP_SETTINGS)
         if self.settings is None:
-            self.settings = self.settings_popup()
+            self.settings_popup()
 
         self.auth()
         self.activity = self.get_current_activity()
@@ -81,6 +81,9 @@ class Harmenubar(rumps.App):
         if r.clicked == 1:
             self.settings = json.loads(r.text)
             self.save_settings()
+        else:
+            rumps.alert('No settings enterred, quitting')
+            sys.exit('')
 
     def save_settings(self):
         with self.open(self.APP_SETTINGS, 'w') as f:
