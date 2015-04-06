@@ -1,18 +1,22 @@
 #
 # Todos:
 # - move out activities to main menu?
-# - Use logging submodule instead of prints
+import sys
 import rumps
 import control
 import config
 import json
+import logging
 
 class Harmenubar(rumps.App):
     APP_SETTINGS = 'settings.json'
     REMOTE_CONFIG = 'remote.json'
 
     def __init__(self):
+        # Rumps initialization
         super(Harmenubar,self).__init__('Harmenubar',icon='resources/icon.png')
+
+        self.log = logging.getLogger('harmenubar')
 
         self.settings = self.load_config_file(self.APP_SETTINGS)
         if self.settings is None:
@@ -25,7 +29,7 @@ class Harmenubar(rumps.App):
         if cfg is None:
             cfg = self.get_and_store_config()
         else:
-            print 'Using cached harmony configuration from disk'
+            self.log.info('Using cached harmony configuration from disk')
 
         self.cfg = config.HarmonyConfig(cfg)
         self.activities = self.cfg.get_activities()
@@ -78,22 +82,22 @@ class Harmenubar(rumps.App):
 
     def auth(self):
         if 'auth_token' in self.settings:
-            print 'Re-using session token from config'
+            self.log.info('Re-using session token from config')
             self.session_token = self.settings['auth_token']
         else:
-            print 'Logging in to Logitech..'
+            self.log.info('Logging in to Logitech..')
             self.session_token = control.login_to_logitech(
                 self.settings['username'],
                 self.settings['password'],
                 self.settings['harmony_ip'])
             self.settings['auth_token'] = self.session_token
             self.save_settings()
-        print self.session_token
+        self.log.debug('Token: %s', self.session_token)
 
     def get_client(self):
         c = control.get_client(self.settings['harmony_ip'], self.session_token)
         if c is None:
-            print 'Could not get client, trying to get new session token'
+            self.log.error('Could not get client, trying to get new session token')
             self.settings.pop('auth_token')
             self.auth()
             c = control.get_client(self.settings['harmony_ip'], self.session_token)
@@ -101,12 +105,12 @@ class Harmenubar(rumps.App):
 
     def get_and_store_config(self):
         client = self.get_client()
-        print 'Getting configuration..'
+        self.log.debug('Getting configuration..')
         cfg = client.get_config()
         client.disconnect(send_close=True)
         with self.open(self.REMOTE_CONFIG,'w') as f:
             f.write(json.dumps(cfg))
-        print 'Configuration saved.'
+        self.log.info('Configuration saved.')
         return cfg
 
     def build_activity_menu(self):
@@ -126,10 +130,10 @@ class Harmenubar(rumps.App):
                 menu.append(rumps.MenuItem(value))
         return menu
 
-    def set_activity(self, menu,id_):
-        print 'Setting activity:', menu,id_
+    def set_activity(self, menu, id_):
+        self.log.info('Setting activity: %s, %d', menu, id_)
         client = self.get_client()
-        print 'call start_activity'
+        self.log.debug('call start_activity')
         client.start_activity(id_)
         client.disconnect(send_close=True)
         self.update_current_activity(id_)
@@ -140,10 +144,14 @@ class Harmenubar(rumps.App):
 
     @rumps.timer(3600)
     def check_activity(self,sender):
-        print 'Checking activity...'
+        self.log.debug('Checking activity...')
         current = self.get_current_activity()
         if current != self.activity:
             self.update_current_activity(current)
 
 if __name__ == '__main__':
+    if len(sys.argv) > 1 and sys.argv[1] == '-v':
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
     Harmenubar().run()
