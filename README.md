@@ -4,6 +4,8 @@ Small proof-of-concept menubar program for Mac OS X to control
 Logitech Harmony hubs. For now the only thing implemented is switching
 between activities.
 
+![Harmenubar screenshot](resources/screenshot.png)
+
 This is just a quick hack, don't expect things to work perfectly out
 of the box.
 
@@ -54,4 +56,4 @@ After this an application will be available under `dist/`
 
 The first time the application is started a popup will be displayed
 with a template config file. This file should be filled out with
-Logitech credentials and IP number to Harmony.
+Logitech credentials and IP number to your Harmony.
