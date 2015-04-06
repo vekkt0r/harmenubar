@@ -46,7 +46,7 @@ You can either run the python script directly from this directory:
 
 Or create a standalone OS X application with py2app:
 
-    python setup.py py2app -A
+    PYTHONPATH=./pyharmony python setup.py py2app --package sleekxmpp
 
 After this an application will be available under `dist/`
 

@@ -1,5 +1,4 @@
 import sys
-sys.path.append('pyharmony')
 from harmony import auth
 from harmony import client as harmony_client
 

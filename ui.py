@@ -1,6 +1,7 @@
 #
 # Todos:
 # - move out activities to main menu?
+import os
 import sys
 import rumps
 import control
@@ -13,8 +14,13 @@ class Harmenubar(rumps.App):
     REMOTE_CONFIG = 'remote.json'
 
     def __init__(self):
+        self.resource_path = os.environ.get('RESOURCEPATH')
+        if self.resource_path is None:
+            self.resource_path = 'resources/'
+
         # Rumps initialization
-        super(Harmenubar,self).__init__('Harmenubar',icon='resources/icon.png')
+        super(Harmenubar,self).__init__('Harmenubar',
+			icon=self.resource_path + '/icon.png')
 
         self.log = logging.getLogger('harmenubar')
 
@@ -65,7 +71,7 @@ class Harmenubar(rumps.App):
                     'password':'',
                     'harmony_ip':'',}
         w = rumps.Window('Change settings in the textbox below', 'Harmenubar settings')
-        w.icon = 'resources/icon.png'
+        w.icon = self.resource_path + 'icon.png'
         if self.settings is None:
             w.default_text = json.dumps(settings, indent=4)
         else:

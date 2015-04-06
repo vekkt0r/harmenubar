@@ -8,10 +8,18 @@ Usage:
 from setuptools import setup
 
 APP = ['ui.py']
-DATA_FILES = []
-OPTIONS = {'argv_emulation': True}
+DATA_FILES = ['resources/icon.png']
+OPTIONS = {
+	'argv_emulation': True, 
+	'plist': {
+		'LSUIElement': True,
+	},
+	'includes': ['harmony'],
+	'iconfile': 'resources/icon.icns'
+}
 
 setup(
+    name='Harmenubar',
     app=APP,
     data_files=DATA_FILES,
     options={'py2app': OPTIONS},
